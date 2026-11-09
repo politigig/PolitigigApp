@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Politigig</title>
+  <meta name="description" content="Politigig: on-demand campaign talent and services, plus interactive U.S. presidential election results.">
+  <meta name="theme-color" content="#0f1f3d" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Politigig">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <a href="#home" class="brand" aria-label="Politigig home">
+      <img src="icons/icon.svg" alt="" width="32" height="32">
+      <span>Politigig</span>
+    </a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="#services">Services</a>
+      <a href="#results">Election results</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="https://app.politigig.com" rel="noopener">Log in</a>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section id="home" class="hero">
+      <div class="wrap hero-inner">
+        <p class="eyebrow">Campaign work, on demand</p>
+        <h1>The talent and tools to win your next race.</h1>
+        <p class="lede">Politigig connects campaigns, committees and causes with vetted political professionals, and gives you the election data to put them where it counts.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://app.politigig.com" rel="noopener">Log in to the portal</a>
+          <a class="btn btn-ghost" href="#results">Explore past elections</a>
+        </div>
+        <ul class="hero-stats" aria-label="Election data at a glance">
+          <li><strong>5</strong><span>presidential cycles</span></li>
+          <li><strong>3,100+</strong><span>counties mapped</span></li>
+          <li><strong>51</strong><span>states &amp; D.C.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="section">
+      <div class="wrap">
+        <p class="eyebrow">What we do</p>
+        <h2>Services</h2>
+        <p class="section-lede">Staff up fast, scale down cleanly. Every service is booked and managed from the Politigig portal.</p>
+        <div class="cards">
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0M4 20a8 8 0 0 1 16 0"/><circle cx="12" cy="7" r="3"/></svg></div>
+            <h3>Campaign staffing</h3>
+            <p>Field directors, organizers, finance and comms staff, matched to your race and ready on short notice.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-6 7 6v11M9 21v-6h6v6"/></svg></div>
+            <h3>Canvassing &amp; field</h3>
+            <p>Door-knocking, phone and text banks, and voter registration drives, with shift tracking built in.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+            <h3>Data &amp; targeting</h3>
+            <p>Historical results, turnout modeling and precinct targeting so every volunteer hour goes further.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+            <h3>Digital &amp; creative</h3>
+            <p>Ad creative, social, video and web from freelancers who know political compliance rules.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></div>
+            <h3>Polling &amp; research</h3>
+            <p>Surveys, focus groups and opposition research from experienced, vetted researchers.</p>
+          </article>
+          <article class="card">
+            <div class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div>
+            <h3>Compliance &amp; finance</h3>
+            <p>Treasurers, FEC and state filings, and payroll for every gig, all handled in one place.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="section section-alt">
+      <div class="wrap">
+        <p class="eyebrow">Election data</p>
+        <h2>Past presidential results</h2>
+        <p class="section-lede">Tap a state for its details and history. Pinch or scroll to zoom, and switch to the county view for local detail.</p>
+
+        <div class="controls" role="group" aria-label="Map controls">
+          <div class="seg" id="yearSeg" role="radiogroup" aria-label="Election year"></div>
+          <div class="seg seg-sm" id="levelSeg" role="radiogroup" aria-label="Map detail">
+            <button type="button" role="radio" aria-checked="true" data-level="state">States</button>
+            <button type="button" role="radio" aria-checked="false" data-level="county">Counties</button>
+          </div>
+        </div>
+
+        <div class="summary" id="summary" aria-live="polite"></div>
+
+        <div class="panel map-panel">
+          <div class="map-wrap" id="mapWrap">
+            <svg id="map" viewBox="0 0 975 610" role="img" aria-label="Map of U.S. presidential results by state"></svg>
+            <div class="tooltip" id="tooltip" role="status" hidden></div>
+            <div class="map-tools">
+              <button type="button" class="icon-btn" id="zoomIn" aria-label="Zoom in">+</button>
+              <button type="button" class="icon-btn" id="zoomOut" aria-label="Zoom out">−</button>
+              <button type="button" class="icon-btn" id="zoomReset" aria-label="Reset map">⟲</button>
+            </div>
+          </div>
+          <div class="legend" id="legend" aria-hidden="true">
+            <span>R +40</span>
+            <div class="legend-bar" id="legendBar"></div>
+            <span>D +40</span>
+          </div>
+          <p class="legend-caption">Shading shows the winning margin between the Democratic and Republican candidates.</p>
+        </div>
+
+        <div class="panel state-panel" id="statePanel" hidden>
+          <div class="state-head">
+            <div>
+              <p class="eyebrow" id="stateEyebrow"></p>
+              <h3 id="stateName"></h3>
+            </div>
+            <button type="button" class="icon-btn" id="stateClose" aria-label="Close state details">✕</button>
+          </div>
+          <div class="state-bars" id="stateBars"></div>
+          <h4 class="chart-title">Winning margin, 2008–2024</h4>
+          <div class="chart-box chart-sm"><canvas id="stateChart" aria-label="State margin over time"></canvas></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3 class="chart-title">National popular vote share</h3>
+            <div class="chart-box"><canvas id="popChart" aria-label="National popular vote share by year"></canvas></div>
+          </div>
+          <div class="panel">
+            <h3 class="chart-title">Electoral votes won</h3>
+            <div class="chart-box"><canvas id="evChart" aria-label="Electoral votes by year"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="chart-title" id="closeTitle">Closest states</h3>
+          <ol class="close-list" id="closeList"></ol>
+        </div>
+
+        <details class="panel table-panel">
+          <summary>View all states as a table</summary>
+          <div class="table-scroll">
+            <table id="stateTable">
+              <thead><tr><th scope="col">State</th><th scope="col" class="num">Dem</th><th scope="col" class="num">Rep</th><th scope="col" class="num">Margin</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <p class="source">Sources: state totals 2008–2020 from the MIT Election Data and Science Lab; county results and 2024 totals from the
+          <a href="https://github.com/tonmcg/US_County_Level_Election_Results_08-24" rel="noopener">US County Level Election Results</a> dataset (MIT License). Alaska is shown at the state level.</p>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section">
+      <div class="wrap">
+        <p class="eyebrow">Getting started</p>
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li><strong>Post a gig.</strong> Describe the role, the district and the dates.</li>
+          <li><strong>Get matched.</strong> Review vetted professionals with campaign experience.</li>
+          <li><strong>Run your campaign.</strong> Manage schedules, hours and payments from the portal.</li>
+        </ol>
+        <div class="cta-band">
+          <div>
+            <h3>Already have an account?</h3>
+            <p>Sign in to the Politigig portal to manage gigs, teams and payments.</p>
+          </div>
+          <a class="btn btn-primary" href="https://app.politigig.com" rel="noopener">Log in at app.politigig.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© <span id="yr"></span> Politigig</span>
+      <a href="https://app.politigig.com" rel="noopener">Portal login</a>
+    </div>
+  </footer>
+
+  <!-- App-style bottom tab bar (mobile) -->
+  <nav class="tabbar" aria-label="App navigation">
+    <a href="#home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+    <a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Services</span></a>
+    <a href="#results"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Results</span></a>
+    <a href="https://app.politigig.com" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg><span>Log in</span></a>
+  </nav>
+
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="js/elections-meta.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
