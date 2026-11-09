@@ -582,8 +582,96 @@
       <details class="districts"><summary>All ${ds.length} districts</summary><ul class="district-list">${ds.map(line).join("")}</ul></details>
       ${ch.source ? `<a class="race-src" href="${ch.source}" rel="noopener">Source</a>` : ""}</div>`;
   }
+  let okTab = "now", okRace = null, okCounty = null;
   function renderOK() {
-    const ok = state.ok, el = $("#okPanel");
+    const el = $("#okPanel");
+    el.innerHTML = `<div class="seg seg-full" id="okTabSeg" role="radiogroup" aria-label="Oklahoma view">
+        <button type="button" role="radio" data-t="now" aria-checked="${okTab === "now"}">Nov 3, 2026</button>
+        <button type="button" role="radio" data-t="past" aria-checked="${okTab === "past"}">Past elections</button>
+      </div><div id="okBody"></div>`;
+    if (okTab === "past") renderOKPast(); else renderOKNow();
+  }
+  $("#okPanel").addEventListener("click", (e) => {
+    const t = e.target.closest("#okTabSeg button");
+    if (t) { okTab = t.dataset.t; renderOK(); return; }
+    const r = e.target.closest("[data-race]");
+    if (r) { okRace = r.dataset.race; okCounty = null; renderOKPast(); return; }
+    const c = e.target.closest("[data-county]");
+    if (c) { okCounty = c.dataset.county; drawOKMap(); renderOKCountyInfo(); $("#okMapCard").scrollIntoView({ block: "start", behavior: "smooth" }); }
+  });
+
+  // ---------- Oklahoma past elections: county map ----------
+  function renderOKPast() {
+    const H = state.okHist, el = $("#okBody");
+    if (!H) { el.innerHTML = '<p class="race-pending">Past Oklahoma results could not be loaded.</p>'; return; }
+    const race = H.races.find((r) => r.id === okRace) || H.races[0];
+    okRace = race.id;
+    const st = race.state;
+    const won = (p) => Object.values(race.counties).filter((v) => (p === "D" ? v[0] > v[1] : v[1] > v[0])).length;
+    const demWon = st[0] > st[1];
+    el.innerHTML = `
+      <div class="chips ok-chips">${H.races.map((r) => `<button type="button" class="chip race-chip" data-race="${r.id}" aria-pressed="${r.id === race.id}">
+        <div class="abbr">${r.year}</div><div class="nm">${esc(r.office)}</div></button>`).join("")}</div>
+      <div class="summary">
+        ${[["Democrat", race.dem, st[0], "var(--dem)", demWon, won("D")], ["Republican", race.rep, st[1], "var(--rep)", !demWon, won("R")]].map(([p, n, v, c, w, cw]) => `
+        <div class="cand" style="--c:${c}">
+          <div class="party"><span>${p}</span>${w ? '<span class="badge">✓ Won</span>' : ""}</div>
+          <div class="name">${esc(n)}</div>
+          <div class="ev">${pct(v / st[2])}</div><div class="ev-label">${fmt(v)} votes</div>
+          <div class="pv">${cw} of 77 counties</div>
+        </div>`).join("")}
+      </div>
+      <div class="card map-card" id="okMapCard">
+        <h3 class="card-title" style="padding:0 6px">${race.year} ${esc(race.office)} by county</h3>
+        <svg id="okMap" role="img" aria-label="Oklahoma ${race.year} ${esc(race.office)} results by county"></svg>
+        <div class="map-info" id="okInfo"></div>
+        <div class="legend" aria-hidden="true"><span>R+40</span><div class="legend-bar" style="background:${$("#legendBar").style.background}"></div><span>D+40</span></div>
+      </div>
+      <h3 class="group-title">All 77 counties</h3>
+      <div class="card table-card"><table>
+        <thead><tr><th>County</th><th class="num">Dem</th><th class="num">Rep</th><th class="num">Margin</th></tr></thead>
+        <tbody>${okCountyRows(race).map((c) => `<tr data-county="${c.f}"><td>${esc(c.name)}</td>
+          <td class="num">${fmt(c.v[0])}</td><td class="num">${fmt(c.v[1])}</td><td class="num">${marginLabel(marginOf(c.v))}</td></tr>`).join("")}</tbody>
+      </table></div>
+      <p class="fineprint">Source: ${esc(race.source)}.</p>`;
+    drawOKMap(); renderOKCountyInfo();
+    const chip = el.querySelector('.race-chip[aria-pressed="true"]');
+    if (chip) chip.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  function okFeatures() { return countiesGeo ? countiesGeo.filter((d) => d.id.startsWith("40")) : []; }
+  function okCountyRows(race) {
+    const names = Object.fromEntries(okFeatures().map((d) => [d.id, d.properties.name]));
+    return Object.entries(race.counties).map(([f, v]) => ({ f, v, name: names[f] || f }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  function drawOKMap() {
+    const race = state.okHist && state.okHist.races.find((r) => r.id === okRace);
+    const feats = okFeatures(), svgEl = document.getElementById("okMap");
+    if (!race || !feats.length || !svgEl) return;
+    const b = path.bounds({ type: "FeatureCollection", features: feats });
+    const pad = 4;
+    const o = d3.select(svgEl).attr("viewBox", [b[0][0] - pad, b[0][1] - pad, b[1][0] - b[0][0] + pad * 2, b[1][1] - b[0][1] + pad * 2].join(" "));
+    o.selectAll("path.okc").data(feats, (d) => d.id).join((en) => en.append("path").attr("class", "okc").attr("d", path)
+        .on("click", (e, d) => { okCounty = d.id; drawOKMap(); renderOKCountyInfo(); })
+        .on("pointermove", (e, d) => { if (e.pointerType === "mouse") { okCounty = d.id; drawOKMap(); renderOKCountyInfo(); } }))
+      .attr("fill", (d) => colorScale(marginOf(race.counties[d.id])))
+      .classed("sel", (d) => d.id === okCounty);
+    o.selectAll("path.okc.sel").raise();
+  }
+  function renderOKCountyInfo() {
+    const race = state.okHist && state.okHist.races.find((r) => r.id === okRace), box = $("#okInfo");
+    if (!race || !box) return;
+    const v = okCounty && race.counties[okCounty];
+    if (!v) { box.innerHTML = "Tap a county to see how it voted."; return; }
+    const name = (okFeatures().find((d) => d.id === okCounty) || { properties: { name: okCounty } }).properties.name;
+    box.innerHTML = `<div class="mi-head"><b>${esc(name)} County</b><span>${marginLabel(marginOf(v))}</span></div>
+      <div class="tt-row"><span class="sw" style="--c:var(--dem)"></span>${esc(race.dem)} (D)<span class="v">${fmt(v[0])} · ${pct(v[0] / v[2])}</span></div>
+      <div class="tt-row"><span class="sw" style="--c:var(--rep)"></span>${esc(race.rep)} (R)<span class="v">${fmt(v[1])} · ${pct(v[1] / v[2])}</span></div>
+      <div class="tt-margin">${fmt(v[2])} total votes${v[2] - v[0] - v[1] > 0 ? ` · ${fmt(v[2] - v[0] - v[1])} for others` : ""}</div>`;
+  }
+
+  function renderOKNow() {
+    const ok = state.ok, el = $("#okBody");
     if (!ok) { el.innerHTML = '<p class="race-pending">Oklahoma results could not be loaded.</p>'; return; }
     el.innerHTML = `
       <div class="status-banner"><div><b>November 3, 2026 general election.</b> ${esc(ok.statusNote)}
@@ -605,6 +693,7 @@
     buildColors();
     if (state.data) renderResults();
     if (state.mode === "gov") renderGov();
+    if (state.mode === "ok") renderOK();
   }
 
   // ---------- load ----------
@@ -612,9 +701,9 @@
   buildColors();
   const optional = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   Promise.all([fetch("data/results.json").then((r) => r.json()), fetch("data/counties-albers-10m.json").then((r) => r.json()),
-    optional("data/governors.json"), optional("data/oklahoma-2026.json")])
-    .then(([data, us, gov, ok]) => {
-      state.data = data; state.gov = gov; state.ok = ok;
+    optional("data/governors.json"), optional("data/oklahoma-2026.json"), optional("data/oklahoma-history.json")])
+    .then(([data, us, gov, ok, okHist]) => {
+      state.data = data; state.gov = gov; state.ok = ok; state.okHist = okHist;
       statesGeo = topojson.feature(us, us.objects.states).features;
       countiesGeo = topojson.feature(us, us.objects.counties).features;
       stateMesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);

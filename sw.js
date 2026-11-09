@@ -1,10 +1,10 @@
 /* Offline cache for the Politigig app shell and election data. */
-const CACHE = "politigig-v4";
+const CACHE = "politigig-v5";
 const ASSETS = [
   "./", "index.html", "styles.css", "manifest.webmanifest", "icons/mark-256.png", "icons/logo-wordmark.png", "icons/icon-192.png",
   "js/app.js", "js/elections-meta.js",
   "vendor/d3.min.js", "vendor/topojson-client.min.js", "vendor/chart.umd.min.js",
-  "data/results.json", "data/counties-albers-10m.json", "data/governors.json", "data/oklahoma-2026.json"
+  "data/results.json", "data/counties-albers-10m.json", "data/governors.json", "data/oklahoma-2026.json", "data/oklahoma-history.json"
 ];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
