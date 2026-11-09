@@ -349,3 +349,5 @@ details.districts summary { cursor: pointer; font-weight: 650; font-size: .88rem
 .sheet[hidden], .sheet-backdrop[hidden] { display: none; }
 #map path.hl.hl-soft { stroke-width: 1.4; opacity: .55; }
 #map path.hl.hl-county { stroke-width: 2.6; }
+.round-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 12px 0 6px; }
+.round-label:first-of-type { margin-top: 0; }

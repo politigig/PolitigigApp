@@ -31,3 +31,22 @@ def wikitext(title, cache=CACHE, delay=3.0):
         json.dump(out, open(fn, "w"))
         return out
     raise RuntimeError("gave up on " + title)
+
+def search(query, limit=50, delay=3.0):
+    """Wikipedia full-text search; returns page titles."""
+    for attempt in range(5):
+        wait = delay - (time.time() - _last[0])
+        if wait > 0: time.sleep(wait)
+        q = urllib.parse.urlencode({"action": "query", "list": "search", "srsearch": query, "srlimit": str(limit),
+                                    "format": "json", "formatversion": "2", "maxlag": "5"})
+        req = urllib.request.Request("https://en.wikipedia.org/w/api.php?" + q, headers={"User-Agent": UA})
+        _last[0] = time.time()
+        try:
+            with urllib.request.urlopen(req, timeout=40) as r:
+                return [h["title"] for h in json.load(r)["query"]["search"]]
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                ra = int(e.headers.get("Retry-After") or 30)
+                print(f"429 on search; waiting {ra}s", file=sys.stderr); time.sleep(max(ra, 30)); continue
+            raise
+    raise RuntimeError("search gave up: " + query)

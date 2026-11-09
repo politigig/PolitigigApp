@@ -604,8 +604,9 @@
     el.innerHTML = `<div class="seg seg-full" id="okTabSeg" role="radiogroup" aria-label="Oklahoma view">
         <button type="button" role="radio" data-t="now" aria-checked="${okTab === "now"}">Nov 3, 2026</button>
         <button type="button" role="radio" data-t="past" aria-checked="${okTab === "past"}">Past elections</button>
+        <button type="button" role="radio" data-t="local" aria-checked="${okTab === "local"}">Local</button>
       </div><div id="okBody"></div>`;
-    if (okTab === "past") renderOKPast(); else renderOKNow();
+    if (okTab === "past") renderOKPast(); else if (okTab === "local") renderOKLocal(); else renderOKNow();
   }
   $("#okPanel").addEventListener("click", (e) => {
     const t = e.target.closest("#okTabSeg button");
@@ -662,6 +663,39 @@
       ${Y.groups.map((g) => `<h3 class="group-title">${esc(g.name)}</h3>${g.races.map(raceCard).join("")}`).join("")}
       <p class="fineprint">Compiled from Wikipedia, which cites the Oklahoma State Election Board. Presidential totals from the MIT Election Data and Science Lab.</p>`;
   }
+  // ---------- Oklahoma local (municipal) elections ----------
+  let okCity = null;
+  function localCard(e) {
+    const rounds = e.rounds.map((r) => {
+      const rows = r.candidates.slice(0, 6).map((c) => {
+        const won = e.winner && c.name === e.winner && r === e.rounds[e.rounds.length - 1];
+        const color = e.partisan ? partyVar(c.party) : won ? "var(--accent)" : "var(--ink-3)";
+        return `<div class="bar-row" style="--c:${color}">
+          <span class="label">${esc(c.name)}${e.partisan && c.party ? ` (${esc(c.party)})` : ""}${won ? ' <span class="won">✓</span>' : ""}</span><span class="val">${pct(c.votes / r.total)} · ${fmt(c.votes)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${(c.votes / r.total) * 100}%"></div></div></div>`;
+      }).join("");
+      const rest = r.candidates.slice(6).reduce((a, c) => a + c.votes, 0);
+      return `${e.rounds.length > 1 ? `<div class="round-label">${esc(r.label)}</div>` : ""}${rows}${rest ? `<div class="race-pending">+ ${fmt(rest)} votes for ${r.candidates.length - 6} others</div>` : ""}`;
+    }).join("");
+    return `<div class="race-card"><div class="race-head"><div><h4>${e.year} ${esc(e.office)}</h4>
+        ${e.winner ? `<div class="sub">Winner: ${esc(e.winner)}</div>` : ""}</div><span class="pill">${e.partisan ? "Partisan" : "Nonpartisan"}</span></div>
+      ${rounds}<a class="race-src" href="${e.source}" rel="noopener">Source</a></div>`;
+  }
+  function renderOKLocal() {
+    const L = state.okLocal, el = $("#okBody");
+    if (!L || !L.cities.length) { el.innerHTML = '<p class="race-pending">Local results could not be loaded.</p>'; return; }
+    const city = L.cities.find((c) => c.city === okCity) || L.cities[0]; okCity = city.city;
+    el.innerHTML = `
+      <div class="seg seg-full" id="okCitySeg" role="radiogroup" aria-label="City">${L.cities.map((c) =>
+        `<button type="button" role="radio" data-city="${esc(c.city)}" aria-checked="${c.city === city.city}">${esc(c.city)}</button>`).join("")}</div>
+      <div class="status-banner"><div>Oklahoma City and Tulsa elect their mayors and councils in <b>nonpartisan</b> races; older races marked "Partisan" used party primaries. A candidate with a majority in the first round wins outright; otherwise the top two meet in a runoff or general election.</div></div>
+      ${city.elections.map(localCard).join("")}
+      <p class="fineprint">Compiled from Wikipedia, which cites the Oklahoma, Tulsa and Oklahoma County election boards. Local races Wikipedia doesn't cover (other cities, county offices, school boards) aren't included yet.</p>`;
+  }
+  $("#okPanel").addEventListener("click", (e) => {
+    const b = e.target.closest("#okCitySeg button"); if (b) { okCity = b.dataset.city; renderOKLocal(); }
+  });
+
   function okFeatures() { return countiesGeo ? countiesGeo.filter((d) => d.id.startsWith("40")) : []; }
   function okCountyRows(race) {
     const names = Object.fromEntries(okFeatures().map((d) => [d.id, d.properties.name]));
@@ -725,8 +759,9 @@
   buildColors();
   const optional = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   Promise.all([fetch("data/results.json").then((r) => r.json()), fetch("data/counties-albers-10m.json").then((r) => r.json()),
-    optional("data/governors.json"), optional("data/oklahoma-2026.json"), optional("data/oklahoma-history.json"), optional("data/oklahoma-years.json")])
-    .then(([data, us, gov, ok, okHist, okYears]) => {
+    optional("data/governors.json"), optional("data/oklahoma-2026.json"), optional("data/oklahoma-history.json"), optional("data/oklahoma-years.json"), optional("data/oklahoma-local.json")])
+    .then(([data, us, gov, ok, okHist, okYears, okLocal]) => {
+      state.okLocal = okLocal;
       state.data = data; state.gov = gov; state.ok = ok; state.okHist = okHist; state.okYears = okYears;
       statesGeo = topojson.feature(us, us.objects.states).features;
       countiesGeo = topojson.feature(us, us.objects.counties).features;
