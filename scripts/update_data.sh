@@ -13,8 +13,11 @@ python3 $D/fetch_gov.py $D $C
 python3 $D/fetch_okyears.py $D $C
 python3 $D/fetch_okraces.py $D $C
 python3 $D/fetch_okhist.py $D $C
+python3 $D/find_oklocal.py $W/oklocal_pages.json
+python3 $D/fetch_oklocal.py $W/oklocal_pages.json $C
 python3 $D/build_extra.py $C data          # data/governors.json, data/oklahoma-2026.json
 python3 $D/build_okextra.py $C .           # governor/Senate county tables -> .cache/okhist_extra.json
 python3 $D/build_okhist.py . $W            # data/oklahoma-history.json
 python3 $D/build_okyears.py $C .           # data/oklahoma-years.json
+python3 $D/build_oklocal.py $C .           # data/oklahoma-local.json
 echo "Data rebuilt. Review with: git diff --stat data/"

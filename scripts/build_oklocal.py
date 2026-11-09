@@ -15,7 +15,7 @@ def office_and_round(title, page_title):
     elif "primary" in t: rnd = "Primary"
     elif "first round" in t: rnd = "First round"
     else: rnd = "General"
-    m = re.search(r"(?:city )?council(?:or)?,?\s*(?:district|ward)\s*(\d+)", t)
+    m = re.search(r"(?:city )?council(?:or)?,?\s*(?:district|ward)\s*(\d+)", t) or re.search(r"council (\d+)(?:st|nd|rd|th) district", t)
     if m: office = f"City Council District {m.group(1)}"
     elif "auditor" in t: office = "City Auditor"
     elif "mayor" in t or "mayoral" in page_title.lower(): office = "Mayor"
@@ -28,10 +28,19 @@ for f in glob.glob(os.path.join(CACHE, "*.json")):
     m = re.match(r"(\d{4}) (Oklahoma City|Tulsa) (mayoral election|municipal elections)$", t)
     if not m or d.get("missing"): continue
     year, city, kind = int(m.group(1)), m.group(2), m.group(3)
-    for b in parse.boxes(d["wikitext"]):
+    w = d["wikitext"]
+    # Wikipedia box titles on these pages contain copy-paste errors (wrong district or year),
+    # so the district comes from the section heading above each box, and the year from the page.
+    heads = [(h.start(), h.group(1).strip()) for h in re.finditer(r"\n=+\s*([^=\n]+?)\s*=+", w)]
+    for b in parse.boxes(w):
         cands = [c for c in b["candidates"] if c["votes"] is not None]
         if len(cands) < 1: continue
         office, rnd = office_and_round(b["title"], t)
+        above = [h for p_, h in heads if p_ < b["raw_pos"]]
+        sec = next((h for h in reversed(above) if re.search(r"district\s*\d+|mayor|auditor", h, re.I)), None)
+        if kind == "municipal elections" and sec:
+            md = re.search(r"district\s*(\d+)", sec, re.I)
+            office = f"City Council District {md.group(1)}" if md else ("Mayor" if re.search("mayor", sec, re.I) else "City Auditor")
         if kind == "municipal elections" and office == "Mayor" and \
            any(json.load(open(g)).get("title") == f"{year} {city} mayoral election" for g in glob.glob(os.path.join(CACHE, "*.json"))):
             continue  # mayor race comes from its own page

@@ -9,6 +9,7 @@ A mobile app for Politigig, built as an installable web app (PWA). It works the 
   - **Governor**: each state's most recent governor's race on a map, with a party tally, the closest 2026 races and a table of all states.
   - **Oklahoma**:
     - *Nov 3, 2026*: every race, including statewide offices, U.S. Senate and House, all 125 legislative seats, state questions and judicial retention.
+    - *Local*: Oklahoma City and Tulsa mayor races (2009–2026) and Tulsa City Council (2022, 2024), with every round, including primaries and runoffs.
     - *Past elections*: county maps colored by margin. Tap a county for its vote counts. Covers President 2008–2024, Governor 2010–2022 and U.S. Senate 2022. Below the map, every race result for that year from 2008 to 2024.
 - **Account**: log in to the Politigig portal at https://app.politigig.com (customers only), install the app, and choose Light, Dark or Auto appearance.
 
@@ -71,6 +72,7 @@ Afterwards, review the changes with `git diff --stat data/` and bump the service
 | `data/governors.json` | Most recent governor race per state: `{ST: {year, status, candidates:[{name, party, votes, winner}], total, source}}` |
 | `data/oklahoma-2026.json` | Oklahoma Nov 3, 2026 races, legislature, state questions, judicial retention |
 | `data/oklahoma-history.json` | Oklahoma county results per race: `{races: [{id, year, office, dem, rep, state, counties: {fips: [dem, rep, total]}}]}` |
+| `data/oklahoma-local.json` | Oklahoma City and Tulsa municipal results: `{cities: [{city, elections: [{year, office, winner, rounds: [{label, candidates, total}]}]}]}` |
 | `data/oklahoma-years.json` | Every Oklahoma statewide/federal race result per year, 2008–2024 |
 | `data/counties-albers-10m.json` | U.S. map geometry (us-atlas) |
 | `dist/` | Upload-ready copy of the site, plus a zip of it (built by `scripts/build_dist.sh`) |
