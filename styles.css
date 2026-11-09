@@ -334,3 +334,4 @@ details.districts summary { cursor: pointer; font-weight: 650; font-size: .88rem
 .pd { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--c); margin-right: 5px; }
 
 .gov-counts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.portal-card .portal-note { font-size: .8rem; color: var(--ink-3); margin: 14px 0 4px; }
