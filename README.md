@@ -5,6 +5,7 @@ A mobile app for Politigig, built as an installable web app (PWA). It works the 
 - **Home**: welcome card with portal login, quick actions, the latest presidential result and the closest states.
 - **Services**: what Politigig offers campaigns. Tap a row to expand it.
 - **Results**: interactive U.S. map (states or 3,100+ counties) for the 2008–2024 presidential elections. You can tap, pinch-zoom and pan it. Tapping a state opens a bottom sheet with its results and its margin history. The tab also has popular-vote and electoral-vote charts, the closest states and a table of all states.
+- **Governor / Oklahoma ’26**: the Results tab also switches to every state's most recent governor's race, and to Oklahoma's Nov 3, 2026 general election (statewide offices, U.S. Senate and House, all 125 legislative seats, state questions and judicial retention).
 - **Account**: log in to the Politigig portal at https://app.politigig.com, install the app, and choose Light, Dark or Auto appearance.
 
 There's no build step. It's static HTML, CSS and JS, and all libraries are vendored in `vendor/`, so it works offline once loaded.
@@ -30,6 +31,8 @@ Upload the folder to any static host (Netlify, Vercel, GitHub Pages, S3/CloudFro
 | `js/app.js` | Tab routing, services list (edit service text here), map, charts, bottom sheet, settings |
 | `js/elections-meta.js` | Candidates, certified electoral-vote totals, electors per state |
 | `data/results.json` | Vote totals: `{year: {states: {fips: [dem, rep, total]}, counties: {...}}}` |
+| `data/governors.json` | Most recent governor race per state: `{ST: {year, status, candidates:[{name, party, votes, winner}], total, source}}` |
+| `data/oklahoma-2026.json` | Oklahoma Nov 3, 2026 races, legislature and state questions |
 | `data/counties-albers-10m.json` | U.S. map geometry (us-atlas) |
 | `sw.js`, `manifest.webmanifest`, `icons/` | PWA / offline support |
 
@@ -37,4 +40,5 @@ Upload the folder to any static host (Netlify, Vercel, GitHub Pages, S3/CloudFro
 
 - State totals 2008–2020: MIT Election Data and Science Lab (certified results).
 - County results 2008–2024 and 2024 state totals: [tonmcg/US_County_Level_Election_Results_08-24](https://github.com/tonmcg/US_County_Level_Election_Results_08-24) (MIT License). The project says this data is not authoritative. Alaska is shown at the state level.
+- Governor results and Oklahoma 2026 results: compiled from Wikipedia, which cites state election offices. 2026 results are **unofficial** until certified, and races Wikipedia hasn't updated yet show as pending.
 - Map geometry: [us-atlas](https://github.com/topojson/us-atlas) (ISC).

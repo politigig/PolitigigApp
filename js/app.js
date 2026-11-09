@@ -4,7 +4,8 @@
   const M = window.ELECTIONS;
   const YEARS = M.years;
   const LATEST = YEARS[YEARS.length - 1];
-  const state = { year: LATEST, level: "state", selected: null, data: null };
+  const state = { year: LATEST, level: "state", selected: null, data: null, mode: "pres", gov: null, ok: null };
+  let pendingMode = null;
   const $ = (s) => document.querySelector(s);
   const fmt = d3.format(",");
   const pct = (x) => (x * 100).toFixed(1) + "%";
@@ -72,6 +73,8 @@
     const changed = current !== view;
     current = view;
     if (view !== "results") closeSheet();
+    const qMode = query && (query.match(/mode=(pres|gov|ok)/) || [])[1];
+    if (view === "results" && qMode) { if (state.data) setMode(qMode); else pendingMode = qMode; }
     if (query && query.includes("focus=close")) {
       requestAnimationFrame(() => $("#closeTitle").scrollIntoView({ block: "start" }));
     } else if (changed) {
@@ -148,6 +151,45 @@
   yearSeg.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setYear(b.dataset.year); });
   $("#levelSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setLevel(b.dataset.level); });
 
+  // ---------- race mode ----------
+  const esc = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const partyVar = (p) => (p === "D" ? "var(--dem)" : p === "R" ? "var(--rep)" : "var(--ink-3)");
+  $("#modeSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setMode(b.dataset.mode); });
+  function setMode(m) {
+    state.mode = m;
+    $("#view-results").dataset.mode = m;
+    $("#modeSeg").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", b.dataset.mode === m));
+    closeSheet(); hideTip();
+    if (m === "gov" && state.level !== "state") setLevel("state");
+    resetInfo(); drawMap();
+    if (m === "gov") renderGov();
+    if (m === "ok") renderOK();
+    if (m === "pres") requestAnimationFrame(() => { popChart && popChart.resize(); evChart && evChart.resize(); });
+  }
+
+  // Governor: signed margin, + = Democratic win, - = Republican win, null = other/pending
+  function govMargin(st) {
+    const r = state.gov && state.gov[st];
+    if (!r || r.status === "pending" || !r.candidates.length) return null;
+    const [a, b] = r.candidates;
+    const m = (a.votes - (b ? b.votes : 0)) / r.total;
+    return a.party === "D" ? m : a.party === "R" ? -m : null;
+  }
+  function govRows(r, max) {
+    const cs = r.candidates.slice(0, max || 4);
+    const rest = r.candidates.slice(max || 4).reduce((a, c) => a + c.votes, 0);
+    const row = (label, n, c, won) => `
+      <div class="bar-row" style="--c:${c}">
+        <span class="label">${label}${won ? ' <span class="won">✓</span>' : ""}</span><span class="val">${pct(n / r.total)} · ${fmt(n)}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(n / r.total) * 100}%"></div></div>
+      </div>`;
+    return cs.map((c) => row(`${esc(c.name)} (${esc(c.party || "?")})`, c.votes, partyVar(c.party), c.winner)).join("") +
+      (rest > 0 ? row("Others", rest, "var(--ink-3)", false) : "");
+  }
+  function govStatusLabel(r) {
+    return r.status === "unofficial" ? `${r.year} · Unofficial` : r.status === "certified" ? `${r.year} · Final` : `${r.year} · Pending`;
+  }
+
   function setYear(y) {
     state.year = y;
     yearSeg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", b.dataset.year === y));
@@ -187,9 +229,16 @@
       .attr("d", path)
       .on("pointermove", onHover).on("pointerleave", hideTip).on("click", onTap)
       .merge(sel)
-      .attr("fill", (d) => colorScale(marginOf(unitValue(d))));
+      .attr("fill", (d) => {
+        if (state.mode === "gov") {
+          const r = state.gov && state.gov[M.states[d.id] ? M.states[d.id][1] : ""];
+          if (r && r.status !== "pending" && r.candidates.length && !["D", "R"].includes(r.candidates[0].party)) return cssVar("--ink-3");
+          return colorScale(govMargin(M.states[d.id] ? M.states[d.id][1] : ""));
+        }
+        return colorScale(marginOf(unitValue(d)));
+      });
     gBorders.selectAll("path").data(state.level === "county" ? [stateMesh] : []).join("path").attr("class", "state-border").attr("d", path);
-    svg.attr("aria-label", `Map of ${state.year} presidential results by ${state.level}`);
+    svg.attr("aria-label", state.mode === "gov" ? "Map of the most recent governor race in each state" : `Map of ${state.year} presidential results by ${state.level}`);
     drawHighlight();
   }
   function drawHighlight() {
@@ -211,6 +260,13 @@
   function onHover(evt, d) {
     if (evt.pointerType !== "mouse") return;
     const v = unitValue(d);
+    if (state.mode === "gov") {
+      const st = M.states[d.id.slice(0, 2)], r = state.gov && state.gov[st[1]];
+      tip.innerHTML = `<div class="tt-title">${st[0]}</div>` + (r && r.status !== "pending"
+        ? r.candidates.slice(0, 2).map((c) => `<div class="tt-row"><span class="sw" style="--c:${partyVar(c.party)}"></span>${esc(c.name)}<span class="v">${pct(c.votes / r.total)}</span></div>`).join("") +
+          `<div class="tt-margin">Governor · ${govStatusLabel(r)}</div>`
+        : `<div class="tt-margin">Governor · ${r ? r.year + " results pending" : "No race"}</div>`);
+    } else
     tip.innerHTML = `<div class="tt-title">${unitTitle(d)}</div>` +
       (v ? voteRows(v) + `<div class="tt-margin">${marginLabel(marginOf(v))} · ${fmt(v[2])} votes</div>` : '<div class="tt-margin">No data</div>');
     const r = wrap.getBoundingClientRect();
@@ -223,12 +279,12 @@
   function hideTip() { tip.hidden = true; }
 
   const mapInfo = $("#mapInfo");
-  function resetInfo() { mapInfo.innerHTML = "Tap a state to see its results. Pinch to zoom."; }
+  function resetInfo() { mapInfo.innerHTML = state.mode === "gov" ? "Tap a state to see its most recent governor's race. Light gray: results not posted yet. Dark gray: won by a third party." : "Tap a state to see its results. Pinch to zoom."; }
   function onTap(evt, d) {
     hideTip();
     const fips = d.id.slice(0, 2);
     state.selected = fips; drawHighlight();
-    if (state.level === "state") { openSheet(fips); return; }
+    if (state.level === "state" || state.mode === "gov") { openSheet(fips); return; }
     const v = unitValue(d);
     mapInfo.innerHTML = `<div class="mi-head"><b>${unitTitle(d)}</b><button type="button" data-open="${fips}">${M.states[fips][1]} details</button></div>` +
       (v ? voteRows(v) + `<div class="tt-margin">${marginLabel(marginOf(v))} · ${fmt(v[2])} votes</div>` : "No data");
@@ -280,6 +336,25 @@
 
   function renderSheet() {
     const fips = state.selected; if (!fips) return;
+    $("#sheetPres").hidden = state.mode === "gov";
+    $("#sheetNote").hidden = state.mode !== "gov";
+    if (state.mode === "gov") {
+      const st = M.states[fips], r = state.gov && state.gov[st[1]];
+      $("#stateName").textContent = st[0];
+      if (!r) {
+        $("#stateEyebrow").textContent = "Governor";
+        $("#stateBars").innerHTML = '<p class="race-pending">No governor election data.</p>';
+        $("#sheetNote").textContent = "";
+        return;
+      }
+      $("#stateEyebrow").textContent = `Governor · ${govStatusLabel(r)}`;
+      $("#stateBars").innerHTML = r.status === "pending" || !r.candidates.length
+        ? `<p class="race-pending">Results for the ${r.year} governor's race have not been posted yet.</p>`
+        : govRows(r, 5);
+      $("#sheetNote").innerHTML = (r.status === "unofficial" ? "Unofficial results; certification is still pending. " : "") +
+        (r.source ? `Source: <a href="${r.source}" rel="noopener">Wikipedia</a>` : "");
+      return;
+    }
     const race = M.races[state.year];
     const v = state.data[state.year].states[fips];
     $("#stateName").textContent = M.states[fips][0];
@@ -438,6 +513,92 @@
     zoomToState(b.dataset.f); openSheet(b.dataset.f);
   });
 
+  // ---------- governor panel ----------
+  function renderGov() {
+    const g = state.gov;
+    if (!g) { $("#govSummary").innerHTML = '<p class="race-pending">Governor data could not be loaded.</p>'; $("#govPanel").innerHTML = ""; return; }
+    const rows = Object.entries(g).map(([ab, r]) => ({ ab, r, name: Object.values(M.states).find((s) => s[1] === ab)[0],
+      fips: Object.keys(M.states).find((f) => M.states[f][1] === ab), m: govMargin(ab) }));
+    const done = rows.filter((x) => x.r.status !== "pending" && x.r.candidates.length);
+    const by = (p) => done.filter((x) => x.r.candidates[0].party === p).length;
+    const other = done.length - by("D") - by("R");
+    const pending = rows.length - done.length;
+    const n26 = rows.filter((x) => x.r.year === 2026), r26 = n26.filter((x) => x.r.status !== "pending" && x.r.candidates.length);
+    $("#govSummary").innerHTML = `
+      <div class="gov-counts">
+        <div class="cand" style="--c:var(--dem)"><div class="party"><span>Democrat</span></div><div class="ev">${by("D")}</div><div class="ev-label">governor races won</div></div>
+        <div class="cand" style="--c:var(--rep)"><div class="party"><span>Republican</span></div><div class="ev">${by("R")}</div><div class="ev-label">governor races won</div></div>
+      </div>
+      <div class="status-banner"><div>Each state's <b>most recent</b> governor's race. ${r26.length} of ${n26.length} races from Nov 3, 2026 have results posted (unofficial).
+        ${other ? ` ${other} won by another party.` : ""}${pending ? ` ${pending} pending.` : ""}</div></div>`;
+
+    const close = r26.slice().sort((a, b) => Math.abs(a.m ?? 1) - Math.abs(b.m ?? 1)).slice(0, 8);
+    const sorted = rows.slice().sort((a, b) => a.name.localeCompare(b.name));
+    $("#govPanel").innerHTML = `
+      <h3 class="group-title">Closest 2026 governor races</h3>
+      <ul class="list close-list">${close.map((x) => `<li><button type="button" data-f="${x.fips}">
+        <span class="sw" style="--c:${partyVar(x.r.candidates[0].party)}"></span>${x.name}
+        <span class="m">${x.m == null ? esc(x.r.candidates[0].party) + " win" : marginLabel(x.m)}</span><span class="chev">›</span></button></li>`).join("") ||
+        '<li class="race-pending" style="padding:14px">No 2026 results posted yet.</li>'}</ul>
+      <h3 class="group-title">All states</h3>
+      <div class="card table-card"><table>
+        <thead><tr><th>State</th><th>Year</th><th>Winner</th><th class="num">Margin</th></tr></thead>
+        <tbody>${sorted.map((x) => {
+          const ok = x.r.status !== "pending" && x.r.candidates.length, w = ok ? x.r.candidates[0] : null;
+          const mg = ok ? (x.r.candidates[1] ? (x.r.candidates[0].votes - x.r.candidates[1].votes) / x.r.total : 1) : null;
+          return `<tr data-f="${x.fips}"><td>${x.name}</td><td>${x.r.year}</td>
+            <td>${w ? `<span class="pd" style="--c:${partyVar(w.party)}"></span>${esc(w.name)}` : '<span class="race-pending">Pending</span>'}</td>
+            <td class="num">${mg == null ? "—" : esc(w.party) + "+" + (mg * 100).toFixed(1)}</td></tr>`; }).join("")}</tbody>
+      </table></div>
+      <p class="fineprint">Governor results compiled from Wikipedia, which cites state election offices. 2026 results are unofficial until each state certifies them.</p>`;
+  }
+  $("#govPanel").addEventListener("click", (e) => { const b = e.target.closest("[data-f]"); if (b) { zoomToState(b.dataset.f); openSheet(b.dataset.f); } });
+
+  // ---------- Oklahoma 2026 panel ----------
+  const OK_OFFICIAL = "https://results.okelections.gov/OKER/?elecDate=20261103";
+  function raceCard(r) {
+    const head = `<div class="race-head"><div><h4>${esc(r.office)}</h4>${r.subtitle ? `<div class="sub">${esc(r.subtitle)}</div>` : ""}</div>`;
+    if (r.status === "outcome")
+      return `<div class="race-card">${head}<span class="pill">${esc(r.outcome)}</span></div>
+        <p class="race-pending">Vote totals not yet available. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
+    if (r.status !== "reported" || !r.candidates.length)
+      return `<div class="race-card">${head}<span class="pill">Pending</span></div>
+        <p class="race-pending">General election results have not been posted to our source yet. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
+    const w = r.candidates[0], m = r.candidates[1] ? (w.votes - r.candidates[1].votes) / r.total : 1;
+    return `<div class="race-card">${head}<span class="pill">${esc(w.party)}+${(m * 100).toFixed(1)}</span></div>
+      ${govRows(r, 4)}${r.source ? `<a class="race-src" href="${r.source}" rel="noopener">Source</a>` : ""}</div>`;
+  }
+  function chamberCard(ch) {
+    const ds = ch.districts || [];
+    const won = (p) => ds.filter((d) => (d.candidates.find((c) => c.winner) || {}).party === p).length;
+    const R = won("R"), D = won("D"), O = ds.length - R - D;
+    const line = (d) => {
+      const w = d.candidates.find((c) => c.winner), opp = d.candidates.filter((c) => !c.winner);
+      const tag = d.note || (d.unopposed ? "Unopposed" : opp.length ? "def. " + opp.map((c) => `${esc(c.name)} (${c.party})`).join(", ") : "");
+      return `<li><span class="dn">${d.district}</span><div>${w ? `<span class="w"><span class="pd" style="--c:${partyVar(w.party)}"></span>${esc(w.name)} (${w.party})</span>` : "Undecided"}
+        <div class="o">${tag}</div></div></li>`;
+    };
+    return `<div class="race-card"><div class="race-head"><h4>${esc(ch.chamber)}</h4><span class="pill">${ds.length} seats up</span></div>
+      <div class="seat-tally"><div style="--c:var(--rep);flex:${R}"></div><div style="--c:var(--dem);flex:${D}"></div>${O ? `<div style="--c:var(--ink-3);flex:${O}"></div>` : ""}</div>
+      <div class="seat-legend"><span><i style="--c:var(--rep)"></i>Republican ${R}</span><span><i style="--c:var(--dem)"></i>Democrat ${D}</span>${O ? `<span><i style="--c:var(--ink-3)"></i>Other/undecided ${O}</span>` : ""}</div>
+      <details class="districts"><summary>All ${ds.length} districts</summary><ul class="district-list">${ds.map(line).join("")}</ul></details>
+      ${ch.source ? `<a class="race-src" href="${ch.source}" rel="noopener">Source</a>` : ""}</div>`;
+  }
+  function renderOK() {
+    const ok = state.ok, el = $("#okPanel");
+    if (!ok) { el.innerHTML = '<p class="race-pending">Oklahoma results could not be loaded.</p>'; return; }
+    el.innerHTML = `
+      <div class="status-banner"><div><b>November 3, 2026 general election.</b> ${esc(ok.statusNote)}
+        <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></div></div>
+      ${ok.groups.map((g) => `<h3 class="group-title">${esc(g.name)}</h3>${g.races.map(raceCard).join("")}`).join("")}
+      <h3 class="group-title">State legislature</h3>
+      ${(ok.legislature || []).map(chamberCard).join("")}
+      ${ok.judicialRetention && ok.judicialRetention.summary ? `<h3 class="group-title">Judicial retention</h3>
+        <div class="race-card"><p class="race-pending" style="color:var(--ink-2)">${esc(ok.judicialRetention.summary)}</p>
+        <a class="race-src" href="${ok.judicialRetention.source}" rel="noopener">Source</a></div>` : ""}
+      <p class="fineprint">Compiled from Wikipedia, which cites the Oklahoma State Election Board's unofficial results. Legislative results show winners only.</p>`;
+  }
+
   function renderResults() {
     hideTip(); drawMap(); renderSummary(); renderCharts(); renderLists();
     if (!sheet.hidden && state.selected) renderSheet();
@@ -445,18 +606,22 @@
   function onThemeChange() {
     buildColors();
     if (state.data) renderResults();
+    if (state.mode === "gov") renderGov();
   }
 
   // ---------- load ----------
   route();
   buildColors();
-  Promise.all([fetch("data/results.json").then((r) => r.json()), fetch("data/counties-albers-10m.json").then((r) => r.json())])
-    .then(([data, us]) => {
-      state.data = data;
+  const optional = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  Promise.all([fetch("data/results.json").then((r) => r.json()), fetch("data/counties-albers-10m.json").then((r) => r.json()),
+    optional("data/governors.json"), optional("data/oklahoma-2026.json")])
+    .then(([data, us, gov, ok]) => {
+      state.data = data; state.gov = gov; state.ok = ok;
       statesGeo = topojson.feature(us, us.objects.states).features;
       countiesGeo = topojson.feature(us, us.objects.counties).features;
       stateMesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
       renderHome(); renderResults();
+      if (pendingMode) { setMode(pendingMode); pendingMode = null; }
     })
     .catch((err) => {
       console.error(err);

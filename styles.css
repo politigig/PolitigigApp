@@ -291,3 +291,46 @@ tbody tr:active { background: var(--surface-2); }
   .sheet-backdrop { inset: auto; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
     height: min(100vh - 48px, 900px); border-radius: 36px; }
 }
+
+/* ---------- Race modes (President / Governor / Oklahoma) ---------- */
+#view-results[data-mode="pres"] .gov-only, #view-results[data-mode="pres"] .ok-only,
+#view-results[data-mode="gov"] .pres-only, #view-results[data-mode="gov"] .ok-only,
+#view-results[data-mode="ok"] .pres-only, #view-results[data-mode="ok"] .gov-only, #view-results[data-mode="ok"] .no-ok { display: none !important; }
+.seg-mode { margin-bottom: 10px; }
+.seg-mode button { font-size: .85rem; }
+
+.ok-promo { display: flex; align-items: center; gap: 12px; }
+.ok-promo > div { flex: 1; }
+.ok-promo strong { display: block; font-size: 1rem; }
+.ok-promo span:not(.chev) { font-size: .82rem; color: var(--ink-2); }
+
+.status-banner { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border-radius: 14px; padding: 12px 14px;
+  font-size: .82rem; color: var(--ink-2); margin-bottom: 12px; border-left: 4px solid var(--accent); }
+.status-banner b { color: var(--ink); }
+
+.race-card { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+.race-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.race-head h4 { margin: 0; font-size: 1rem; }
+.race-head .sub { font-size: .78rem; color: var(--ink-3); }
+.race-head .pill { font-size: .7rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.race-card .bar-row .label { display: flex; align-items: center; gap: 6px; }
+.race-card .won { font-size: .7rem; font-weight: 800; color: var(--ink); }
+.race-pending { font-size: .85rem; color: var(--ink-3); margin: 0; }
+.race-pending a, .race-src { font-size: .75rem; }
+.race-src { display: inline-block; margin-top: 4px; color: var(--ink-3); }
+
+.seat-tally { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0 8px; }
+.seat-tally div { background: var(--c); }
+.seat-tally div + div { margin-left: 2px; }
+.seat-legend { display: flex; gap: 14px; font-size: .82rem; color: var(--ink-2); flex-wrap: wrap; }
+.seat-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: var(--c); margin-right: 5px; }
+details.districts { margin-top: 10px; }
+details.districts summary { cursor: pointer; font-weight: 650; font-size: .88rem; color: var(--primary); min-height: 36px; display: flex; align-items: center; }
+.district-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.district-list li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); font-size: .85rem; }
+.district-list .dn { font-weight: 800; color: var(--ink-3); }
+.district-list .w { font-weight: 650; }
+.district-list .o { color: var(--ink-3); font-size: .8rem; }
+.pd { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--c); margin-right: 5px; }
+
+.gov-counts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }

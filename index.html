@@ -51,6 +51,15 @@
         <div class="skeleton">Loading results…</div>
       </a>
 
+      <a class="card card-link ok-promo" href="#/results?mode=ok">
+        <div><p class="eyebrow">Nov 3, 2026 · Unofficial</p><strong>Oklahoma election results</strong><span>Governor, Senate, House, legislature and more</span></div>
+        <span class="chev">›</span>
+      </a>
+      <a class="card card-link ok-promo" href="#/results?mode=gov">
+        <div><p class="eyebrow">All 50 states</p><strong>Governor results</strong><span>Each state's most recent governor's race</span></div>
+        <span class="chev">›</span>
+      </a>
+
       <h3 class="group-title">Closest states in 2024</h3>
       <div class="chips" id="homeChips"></div>
 
@@ -70,14 +79,20 @@
     </section>
 
     <!-- RESULTS -->
-    <section class="view" id="view-results" data-title="Election Results" aria-label="Election results" hidden>
-      <div class="seg seg-full" id="yearSeg" role="radiogroup" aria-label="Election year"></div>
+    <section class="view" id="view-results" data-title="Election Results" data-mode="pres" aria-label="Election results" hidden>
+      <div class="seg seg-full seg-mode" id="modeSeg" role="radiogroup" aria-label="Race">
+        <button type="button" role="radio" aria-checked="true" data-mode="pres">President</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="gov">Governor</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="ok">Oklahoma ’26</button>
+      </div>
+      <div class="seg seg-full pres-only" id="yearSeg" role="radiogroup" aria-label="Election year"></div>
 
-      <div class="summary" id="summary" aria-live="polite"></div>
+      <div class="summary pres-only" id="summary" aria-live="polite"></div>
+      <div class="gov-only" id="govSummary" aria-live="polite"></div>
 
-      <div class="card map-card">
+      <div class="card map-card no-ok">
         <div class="map-head">
-          <div class="seg seg-sm" id="levelSeg" role="radiogroup" aria-label="Map detail">
+          <div class="seg seg-sm pres-only" id="levelSeg" role="radiogroup" aria-label="Map detail">
             <button type="button" role="radio" aria-checked="true" data-level="state">States</button>
             <button type="button" role="radio" aria-checked="false" data-level="county">Counties</button>
           </div>
@@ -97,26 +112,29 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card pres-only">
         <h3 class="card-title">National popular vote</h3>
         <div class="chart-box"><canvas id="popChart" aria-label="National popular vote share by year"></canvas></div>
       </div>
-      <div class="card">
+      <div class="card pres-only">
         <h3 class="card-title">Electoral votes</h3>
         <div class="chart-box"><canvas id="evChart" aria-label="Electoral votes by year"></canvas></div>
       </div>
 
-      <h3 class="group-title" id="closeTitle">Closest states</h3>
-      <ul class="list close-list" id="closeList"></ul>
+      <h3 class="group-title pres-only" id="closeTitle">Closest states</h3>
+      <ul class="list close-list pres-only" id="closeList"></ul>
 
-      <h3 class="group-title">All states</h3>
-      <div class="card table-card">
+      <div class="gov-only" id="govPanel"></div>
+      <div class="ok-only" id="okPanel"></div>
+
+      <h3 class="group-title pres-only">All states</h3>
+      <div class="card table-card pres-only">
         <table id="stateTable">
           <thead><tr><th scope="col">State</th><th scope="col" class="num">Dem</th><th scope="col" class="num">Rep</th><th scope="col" class="num">Margin</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
-      <p class="fineprint">Sources: MIT Election Data and Science Lab (state totals 2008–2020). County results and 2024 totals come from the US County Level Election Results dataset (MIT License). Alaska is shown at the state level.</p>
+      <p class="fineprint pres-only">Sources: MIT Election Data and Science Lab (state totals 2008–2020). County results and 2024 totals come from the US County Level Election Results dataset (MIT License). Alaska is shown at the state level.</p>
     </section>
 
     <!-- ACCOUNT -->
@@ -190,9 +208,12 @@
         <button type="button" class="icon-btn" id="sheetClose" aria-label="Close">✕</button>
       </div>
       <div id="stateBars"></div>
-      <h3 class="card-title">Winning margin, 2008–2024</h3>
-      <div class="chart-box chart-sm"><canvas id="stateChart" aria-label="State margin over time"></canvas></div>
-      <div class="sheet-years" id="sheetYears"></div>
+      <div id="sheetPres">
+        <h3 class="card-title">Winning margin, 2008–2024</h3>
+        <div class="chart-box chart-sm"><canvas id="stateChart" aria-label="State margin over time"></canvas></div>
+        <div class="sheet-years" id="sheetYears"></div>
+      </div>
+      <p class="fineprint" id="sheetNote" hidden></p>
     </div>
   </div>
 </div>
