@@ -555,7 +555,16 @@
   // ---------- Oklahoma 2026 panel ----------
   const OK_OFFICIAL = "https://results.okelections.gov/OKER/?elecDate=20261103";
   function raceCard(r) {
-    const head = `<div class="race-head"><div><h4>${esc(r.office)}</h4>${r.subtitle ? `<div class="sub">${esc(r.subtitle)}</div>` : ""}</div>`;
+    const title = r.office + (r.district && !/District/.test(r.office) ? ` District ${r.district}` : "");
+    const head = `<div class="race-head"><div><h4>${esc(title)}</h4>${r.subtitle ? `<div class="sub">${esc(r.subtitle)}</div>` : ""}</div>`;
+    if (r.status === "measure") {
+      const t = r.yes + r.no;
+      const row = (label, n, c) => `<div class="bar-row" style="--c:${c}"><span class="label">${label}</span><span class="val">${pct(n / t)} · ${fmt(n)}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(n / t) * 100}%"></div></div></div>`;
+      return `<div class="race-card">${head}<span class="pill">${esc(r.outcome)}</span></div>
+        ${row("Yes", r.yes, "var(--accent)")}${row("No", r.no, "var(--ink-3)")}
+        ${r.source && /^http/.test(r.source) ? `<a class="race-src" href="${r.source}" rel="noopener">Source</a>` : ""}</div>`;
+    }
     if (r.status === "outcome")
       return `<div class="race-card">${head}<span class="pill">${esc(r.outcome)}</span></div>
         <p class="race-pending">Vote totals not yet available. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
@@ -564,7 +573,7 @@
         <p class="race-pending">General election results have not been posted to our source yet. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
     const w = r.candidates[0], m = r.candidates[1] ? (w.votes - r.candidates[1].votes) / r.total : 1;
     return `<div class="race-card">${head}<span class="pill">${esc(w.party)}+${(m * 100).toFixed(1)}</span></div>
-      ${govRows(r, 4)}${r.source ? `<a class="race-src" href="${r.source}" rel="noopener">Source</a>` : ""}</div>`;
+      ${govRows(r, 4)}${r.source && /^http/.test(r.source) ? `<a class="race-src" href="${r.source}" rel="noopener">Source</a>` : r.source ? `<span class="race-src">Source: ${esc(r.source)}</span>` : ""}</div>`;
   }
   function chamberCard(ch) {
     const ds = ch.districts || [];
@@ -633,10 +642,18 @@
         <tbody>${okCountyRows(race).map((c) => `<tr data-county="${c.f}"><td>${esc(c.name)}</td>
           <td class="num">${fmt(c.v[0])}</td><td class="num">${fmt(c.v[1])}</td><td class="num">${marginLabel(marginOf(c.v))}</td></tr>`).join("")}</tbody>
       </table></div>
-      <p class="fineprint">Source: ${esc(race.source)}.</p>`;
+      <p class="fineprint">Source: ${esc(race.source)}.</p>
+      ${okYearRaces(race.year)}`;
     drawOKMap(); renderOKCountyInfo();
     const chip = el.querySelector('.race-chip[aria-pressed="true"]');
     if (chip) chip.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  function okYearRaces(year) {
+    const Y = state.okYears && state.okYears.years.find((y) => y.year === year);
+    if (!Y || !Y.groups.length) return "";
+    return `<h2 class="year-head">All ${year} results</h2>
+      ${Y.groups.map((g) => `<h3 class="group-title">${esc(g.name)}</h3>${g.races.map(raceCard).join("")}`).join("")}
+      <p class="fineprint">Compiled from Wikipedia, which cites the Oklahoma State Election Board. Presidential totals from the MIT Election Data and Science Lab.</p>`;
   }
   function okFeatures() { return countiesGeo ? countiesGeo.filter((d) => d.id.startsWith("40")) : []; }
   function okCountyRows(race) {
@@ -701,9 +718,9 @@
   buildColors();
   const optional = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   Promise.all([fetch("data/results.json").then((r) => r.json()), fetch("data/counties-albers-10m.json").then((r) => r.json()),
-    optional("data/governors.json"), optional("data/oklahoma-2026.json"), optional("data/oklahoma-history.json")])
-    .then(([data, us, gov, ok, okHist]) => {
-      state.data = data; state.gov = gov; state.ok = ok; state.okHist = okHist;
+    optional("data/governors.json"), optional("data/oklahoma-2026.json"), optional("data/oklahoma-history.json"), optional("data/oklahoma-years.json")])
+    .then(([data, us, gov, ok, okHist, okYears]) => {
+      state.data = data; state.gov = gov; state.ok = ok; state.okHist = okHist; state.okYears = okYears;
       statesGeo = topojson.feature(us, us.objects.states).features;
       countiesGeo = topojson.feature(us, us.objects.counties).features;
       stateMesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
