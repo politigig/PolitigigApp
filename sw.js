@@ -1,5 +1,5 @@
 /* Offline cache for the Politigig app shell and election data. */
-const CACHE = "politigig-v1";
+const CACHE = "politigig-v2";
 const ASSETS = [
   "./", "index.html", "styles.css", "manifest.webmanifest", "icons/icon.svg",
   "js/app.js", "js/elections-meta.js",

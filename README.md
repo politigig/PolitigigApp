@@ -1,10 +1,11 @@
 # Politigig App Website
 
-Mobile-first website and installable web app (PWA) for Politigig. It includes:
+A mobile app for Politigig, built as an installable web app (PWA). It works the way a native app does: four tabs, screens that switch in place, and a bottom sheet for details. On a computer it appears inside a phone-sized frame.
 
-- **Services showcase**: what Politigig offers campaigns.
-- **Portal login**: every "Log in" button links to https://app.politigig.com.
-- **Election results explorer**: interactive U.S. map (states or 3,100+ counties) for the 2008–2024 presidential elections. You can tap, pinch-zoom and pan it. It also has national popular-vote and electoral-vote charts, a per-state margin history, a "closest states" list and a full table view.
+- **Home**: welcome card with portal login, quick actions, the latest presidential result and the closest states.
+- **Services**: what Politigig offers campaigns. Tap a row to expand it.
+- **Results**: interactive U.S. map (states or 3,100+ counties) for the 2008–2024 presidential elections. You can tap, pinch-zoom and pan it. Tapping a state opens a bottom sheet with its results and its margin history. The tab also has popular-vote and electoral-vote charts, the closest states and a table of all states.
+- **Account**: log in to the Politigig portal at https://app.politigig.com, install the app, and choose Light, Dark or Auto appearance.
 
 There's no build step. It's static HTML, CSS and JS, and all libraries are vendored in `vendor/`, so it works offline once loaded.
 
@@ -24,9 +25,9 @@ Upload the folder to any static host (Netlify, Vercel, GitHub Pages, S3/CloudFro
 
 | Path | Purpose |
 |---|---|
-| `index.html` | Page layout and copy (edit the services text here) |
+| `index.html` | App shell, tabs and screens |
 | `styles.css` | Theme tokens (brand colors, light/dark) and layout |
-| `js/app.js` | Map, charts, interactions |
+| `js/app.js` | Tab routing, services list (edit service text here), map, charts, bottom sheet, settings |
 | `js/elections-meta.js` | Candidates, certified electoral-vote totals, electors per state |
 | `data/results.json` | Vote totals: `{year: {states: {fips: [dem, rep, total]}, counties: {...}}}` |
 | `data/counties-albers-10m.json` | U.S. map geometry (us-atlas) |
