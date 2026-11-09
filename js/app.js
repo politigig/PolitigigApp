@@ -99,9 +99,7 @@
     ["Digital & creative", "Ads, social and video", "Ad creative, social, video and web from freelancers who know political compliance rules.",
       '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/>'],
     ["Polling & research", "Surveys and focus groups", "Surveys, focus groups and opposition research from experienced, vetted researchers.",
-      '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>'],
-    ["Compliance & finance", "Treasurers, filings and payroll", "Treasurers, FEC and state filings, and payroll for every gig, all handled in one place.",
-      '<path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>']
+      '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>']
   ];
   $("#servicesList").innerHTML = SERVICES.map(([t, s, d, icon], i) => `
     <li>
