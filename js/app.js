@@ -40,7 +40,7 @@
     else document.documentElement.removeAttribute("data-theme");
     themeSeg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", b.dataset.theme === t));
     const dark = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-    document.querySelector('meta[name="theme-color"]').content = dark ? "#0b1220" : "#0f1f3d";
+    document.querySelector('meta[name="theme-color"]').content = dark ? "#0b1220" : "#26445e";
   }
   let theme = store.get("pg-theme") || "system";
   applyTheme(theme);
@@ -65,6 +65,10 @@
     document.querySelectorAll(".tabbar a").forEach((a) =>
       a.dataset.tab === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
     $("#appbarTitle").textContent = document.getElementById("view-" + view).dataset.title;
+    // Home shows the wordmark; other tabs show the mark plus the screen title
+    $("#appbarWordmark").hidden = view !== "home";
+    $("#appbarTitle").hidden = view === "home";
+    $("#appbarMark").style.visibility = view === "home" ? "hidden" : "visible";
     const changed = current !== view;
     current = view;
     if (view !== "results") closeSheet();

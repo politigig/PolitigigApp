@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <title>Politigig</title>
   <meta name="description" content="Politigig: on-demand campaign talent and services, plus interactive U.S. presidential election results.">
-  <meta name="theme-color" content="#0f1f3d">
+  <meta name="theme-color" content="#26445e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Politigig">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,8 +20,11 @@
 
   <!-- App bar -->
   <header class="appbar">
-    <img class="appbar-logo" src="icons/icon.svg" alt="" width="30" height="30">
-    <h1 class="appbar-title" id="appbarTitle">Politigig</h1>
+    <img class="appbar-logo" id="appbarMark" src="icons/mark-256.png" alt="" width="32" height="32">
+    <div class="appbar-center">
+      <img class="appbar-wordmark" id="appbarWordmark" src="icons/logo-wordmark.png" alt="politigig.com" width="140" height="28">
+      <h1 class="appbar-title" id="appbarTitle" hidden>Politigig</h1>
+    </div>
     <a class="appbar-action" href="https://app.politigig.com" rel="noopener" aria-label="Log in to the Politigig portal">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
     </a>
@@ -32,10 +35,8 @@
     <!-- HOME -->
     <section class="view" id="view-home" data-title="Politigig" aria-label="Home">
       <div class="hero-card">
-        <p class="eyebrow">Campaign work, on demand</p>
-        <h2>Welcome to Politigig</h2>
-        <p>Vetted campaign talent and the election data to deploy it, all in your pocket.</p>
-        <a class="btn btn-gold btn-block" href="https://app.politigig.com" rel="noopener">Log in to the portal</a>
+        <img class="hero-mark" src="icons/mark-256.png" alt="" width="64" height="64">
+        <h2>Welcome to the app</h2>
       </div>
 
       <div class="quick">
@@ -121,7 +122,7 @@
     <!-- ACCOUNT -->
     <section class="view" id="view-account" data-title="Account" aria-label="Account" hidden>
       <div class="card portal-card">
-        <img src="icons/icon.svg" alt="" width="56" height="56">
+        <img src="icons/mark-256.png" alt="" width="64" height="64">
         <h2>Politigig Portal</h2>
         <p>Sign in to post gigs, manage your team and handle payments.</p>
         <a class="btn btn-primary btn-block" href="https://app.politigig.com" rel="noopener">Log in</a>
