@@ -194,7 +194,7 @@
     renderResults();
   }
   function setLevel(l) {
-    state.level = l;
+    state.level = l; state.selCounty = null;
     $("#levelSeg").querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", b.dataset.level === l));
     resetInfo(); drawMap();
   }
@@ -241,13 +241,18 @@
   }
   function drawHighlight() {
     const f = state.selected && statesGeo ? statesGeo.filter((d) => d.id === state.selected) : [];
-    gHl.selectAll("path").data(f).join("path").attr("class", "hl").attr("d", path);
+    // in county view, also outline the tapped county
+    const c = state.level === "county" && state.selCounty && countiesGeo ? countiesGeo.filter((d) => d.id === state.selCounty) : [];
+    gHl.selectAll("path").data([...f, ...c], (d) => d.id).join("path")
+      .attr("class", (d) => (d.id.length === 5 ? "hl hl-county" : c.length ? "hl hl-soft" : "hl")).attr("d", path);
   }
 
   function unitTitle(d) {
     const st = M.states[d.id.slice(0, 2)];
     const isCounty = state.level === "county" && state.data[state.year].counties[d.id];
-    return isCounty ? `${d.properties.name}, ${st[1]}` : st[0];
+    if (!isCounty) return st[0];
+    const name = d.properties.name, suffix = st[1] === "LA" ? " Parish" : st[1] === "AK" || /city$/i.test(name) ? "" : " County";
+    return `${name}${suffix}, ${st[1]}`;
   }
   function voteRows(v) {
     const race = M.races[state.year];
@@ -281,7 +286,9 @@
   function onTap(evt, d) {
     hideTip();
     const fips = d.id.slice(0, 2);
-    state.selected = fips; drawHighlight();
+    state.selected = fips;
+    state.selCounty = state.level === "county" && state.mode !== "gov" ? d.id : null;
+    drawHighlight();
     if (state.level === "state" || state.mode === "gov") { openSheet(fips); return; }
     const v = unitValue(d);
     mapInfo.innerHTML = `<div class="mi-head"><b>${unitTitle(d)}</b><button type="button" data-open="${fips}">${M.states[fips][1]} details</button></div>` +
