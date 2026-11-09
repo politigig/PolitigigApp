@@ -1,0 +1,24 @@
+POLITIGIG APP - INSTALL
+=======================
+
+1. Upload everything in this folder to your web server: the folder's contents,
+   not the folder itself, if the app should be at the site's root.
+   Example: upload into public_html/ so the app opens at https://yourdomain.com/
+   It also works from a subfolder, e.g. public_html/app/ -> https://yourdomain.com/app/
+
+2. Make sure the site is served over HTTPS. Installing the app to a phone's
+   home screen and offline use both require HTTPS.
+
+3. Open the site on a phone and check that the map and results load.
+
+That's it. There is nothing to install or build on the server: it's a static site.
+
+Notes
+-----
+- .htaccess is for Apache hosts (most shared hosting). It is a hidden file, so make
+  sure your upload tool includes it. On other servers it is ignored and not needed.
+- nginx: add  types { application/manifest+json webmanifest; }  and serve sw.js with
+  "Cache-Control: no-cache".
+- Updating: replace all files with the new version. Installed copies pick up the
+  update the next time they're opened.
+- The "Log in" button links to https://app.politigig.com.

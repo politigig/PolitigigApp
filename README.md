@@ -14,6 +14,17 @@ A mobile app for Politigig, built as an installable web app (PWA). It works the 
 
 There's no build step. It's static HTML, CSS and JS, and all libraries are vendored in `vendor/`, so it works offline once loaded.
 
+## Install on a server
+
+The upload-ready site is in **`dist/politigig-site/`**. It's also zipped as **`dist/politigig-site.zip`**, which you can download from GitHub with one click (open the file, then **Download raw file**).
+
+1. Unzip it and upload the **contents** of `politigig-site/` to your web server, for example into `public_html/`. It also works from a subfolder.
+2. Serve it over HTTPS; installing to a phone's home screen and offline use require it.
+
+Nothing needs to be installed or built on the server. `INSTALL.txt` inside the folder has the same steps plus notes for Apache and nginx.
+
+After changing the app or its data, rebuild the folder and zip with `scripts/build_dist.sh`, then commit `dist/`.
+
 ## Run locally
 
 ```bash
@@ -24,7 +35,7 @@ Open http://localhost:8080. The page has to be served over HTTP, not opened as a
 
 ## Deploy
 
-Upload the folder to any static host (Netlify, Vercel, GitHub Pages, S3/CloudFront). `scripts/` and `.cache/` don't need to be uploaded. To ship it as a store app, wrap the hosted URL with Capacitor or a TWA (Android). The manifest and service worker already make it installable from the browser.
+Upload `dist/politigig-site/` to any static host (your own server, Netlify, Vercel, GitHub Pages, S3/CloudFront). To ship it as a store app, wrap the hosted URL with Capacitor or a TWA (Android). The manifest and service worker already make it installable from the browser.
 
 When you change files that the service worker caches, bump `CACHE` in `sw.js` (for example `politigig-v6` → `politigig-v7`) so installed copies pick up the update.
 
@@ -62,6 +73,7 @@ Afterwards, review the changes with `git diff --stat data/` and bump the service
 | `data/oklahoma-history.json` | Oklahoma county results per race: `{races: [{id, year, office, dem, rep, state, counties: {fips: [dem, rep, total]}}]}` |
 | `data/oklahoma-years.json` | Every Oklahoma statewide/federal race result per year, 2008–2024 |
 | `data/counties-albers-10m.json` | U.S. map geometry (us-atlas) |
+| `dist/` | Upload-ready copy of the site, plus a zip of it (built by `scripts/build_dist.sh`) |
 | `scripts/` | Data download and build scripts (`update_data.sh` runs them all) |
 | `sw.js`, `manifest.webmanifest`, `icons/` | PWA / offline support |
 

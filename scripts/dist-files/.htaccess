@@ -1,0 +1,16 @@
+# Politigig app: settings for Apache hosts (most shared hosting, cPanel).
+# Other servers ignore this file.
+
+# Correct file types for the app manifest and data
+AddType application/manifest+json .webmanifest
+AddType application/json .json
+
+# Always check for a new service worker, so app updates reach installed copies
+<Files "sw.js">
+  Header set Cache-Control "no-cache"
+</Files>
+
+# Compress text files
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
