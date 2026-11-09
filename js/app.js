@@ -567,7 +567,7 @@
     }
     if (r.status === "outcome")
       return `<div class="race-card">${head}<span class="pill">${esc(r.outcome)}</span></div>
-        <p class="race-pending">Vote totals not yet available. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
+        <p class="race-pending">${r.note ? esc(r.note) : `Vote totals not yet available. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a>`}</p></div>`;
     if (r.status !== "reported" || !r.candidates.length)
       return `<div class="race-card">${head}<span class="pill">Pending</span></div>
         <p class="race-pending">General election results have not been posted to our source yet. <a href="${OK_OFFICIAL}" rel="noopener">Official results</a></p></div>`;
