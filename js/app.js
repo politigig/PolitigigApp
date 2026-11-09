@@ -135,7 +135,7 @@
     ]);
     // sqrt easing so narrow wins still read as a clear lean
     colorScale = (m) => {
-      if (m == null) return cssVar("--surface-2");
+      if (m == null) return cssVar("--line");
       const t = Math.sign(m) * Math.sqrt(Math.min(1, Math.abs(m) / 0.4));
       return interp((t + 1) / 2);
     };
