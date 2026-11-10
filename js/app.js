@@ -122,8 +122,6 @@
     if (!deferredPrompt) return;
     deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("#installRow").hidden = true;
   });
-  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone) $("#iosInstallRow").hidden = false;
 
   // ---------- colors ----------
   let colorScale;
