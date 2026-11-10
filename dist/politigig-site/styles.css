@@ -152,11 +152,6 @@ button { font: inherit; color: inherit; }
 .chev { color: var(--ink-3); font-size: 1.4rem; line-height: 1; transition: transform .2s; }
 
 /* ---------- Home ---------- */
-.hero-card { background: radial-gradient(120% 120% at 100% 0%, rgba(61,201,162,.35) 0%, transparent 55%),
-  radial-gradient(90% 90% at 0% 100%, rgba(49,162,238,.3) 0%, transparent 60%), #26445e; color: #fff;
-  border-radius: 24px; padding: 26px 20px; margin-bottom: 18px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
-.hero-mark { border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
-.hero-card h2 { font-size: 1.6rem; font-weight: 800; }
 .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .quick-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: var(--ink);
   font-size: .72rem; font-weight: 600; text-align: center; }
